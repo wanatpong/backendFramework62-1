@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const MongoClient = require("mongodb").MongoClient;
+const jwt = require("jsonwebtoken");
 
 // Test commit
 router.get("/", (req, res) => {
@@ -40,8 +41,8 @@ router.post("/register", (req, res) => {
     var last_nameVar = req.body.last_name;
     var id_milVar = req.body.id_mil;
     var unit_nameVar = req.body.unit_name;
-    var nameVar = req.body.username; // name คือตัวที่พิมลง postman
-    var passwordVar = req.body.password; // password พิมค่าลง postman
+    var nameVar = req.body.username; // name คือตัวที่พิมลง postman     
+    var passwordVar = req.body.password; // password พิมค่าลง postman     
     MongoClient.connect(
         "mongodb+srv://weerayut:22374736@cluster0-4wunc.gcp.mongodb.net/newDatabase62?retryWrites=true", {
             useNewUrlParser: true
@@ -58,15 +59,16 @@ router.post("/register", (req, res) => {
                 last_name: last_nameVar,
                 id_mil: id_milVar,
                 unit_name: unit_nameVar,
-                username: nameVar, // username คือค่า attribute ใน db
-                password: passwordVar // password คือค่า attribute ใน db
+                username: nameVar, // username คือค่า attribute ใน db                 
+                password: passwordVar // password คือค่า attribute ใน db             
             };
             dbo.collection("userLoginTable").findOne({
                 username: nameVar
             }, function (err, result) {
                 if (err) {
                     res.send({
-                        status: false
+                        status: false,
+                        message: err.message
                     });
                 }
                 console.log(result);
@@ -80,19 +82,18 @@ router.post("/register", (req, res) => {
                     dbo.collection("userLoginTable").insertOne(userObj, function (err, result) {
                         if (err) {
                             res.send({
-                                status: false
+                                status: false,
+                                message: err.message
                             });
                         }
                         res.send({
-                            status: "store success",
-                            name: nameVar //response
+                            status: true
                         });
                     });
                 }
             });
             db.close();
-        }
-    );
+        });
 });
 
 router.post("/login", (req, res) => {
@@ -111,18 +112,31 @@ router.post("/login", (req, res) => {
             dbo.collection("userLoginTable").findOne({
                 username: nameVar,
                 password: passwordVar
-            }, function (err, result) {
-                console.log(result);
-
+            }, function (err, user) {
                 if (err) {
                     res.send({
                         status: false
                     });
                 }
-                if (result) {
-                    res.send({
-                        status: true
+                if (user) {
+                    var jwtBearerToken = jwt.sign({
+                        id: user._id,
+                        rank: user.rank,
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        id_mil: user.id_mil,
+                        unit_name: user.unit_name,
+                        username: user.username
+                    }, 'secret', {
+                        expiresIn: "365d", // 1 Year                         
+                        subject: "JWT"
                     });
+                    res.send(
+                        JSON.stringify({
+                            status: true,
+                            token: jwtBearerToken
+                        })
+                    );
                 } else {
                     res.send({
                         status: false
@@ -133,5 +147,28 @@ router.post("/login", (req, res) => {
         }
     );
 });
+
+router.post('/verifyToken', (req, res) => {
+    jwt.verify(
+        req.body.token,
+        'secret', {},
+        function (err, payload) {
+            if (payload) {
+                res.send(
+                    JSON.stringify({
+                        verify: true
+                    })
+                );
+            } else {
+                res.send(
+                    JSON.stringify({
+                        verify: false
+                    })
+                );
+            }
+        }
+    );
+});
+
 
 module.exports = router;
