@@ -41,8 +41,8 @@ router.post("/register", (req, res) => {
     var last_nameVar = req.body.last_name;
     var id_milVar = req.body.id_mil;
     var unit_nameVar = req.body.unit_name;
-    var nameVar = req.body.username; // name คือตัวที่พิมลง postman     
-    var passwordVar = req.body.password; // password พิมค่าลง postman     
+    var nameVar = req.body.username; // name คือตัวที่พิมลง postman
+    var passwordVar = req.body.password; // password พิมค่าลง postman
     MongoClient.connect(
         "mongodb+srv://weerayut:22374736@cluster0-4wunc.gcp.mongodb.net/newDatabase62?retryWrites=true", {
             useNewUrlParser: true
@@ -59,8 +59,8 @@ router.post("/register", (req, res) => {
                 last_name: last_nameVar,
                 id_mil: id_milVar,
                 unit_name: unit_nameVar,
-                username: nameVar, // username คือค่า attribute ใน db                 
-                password: passwordVar // password คือค่า attribute ใน db             
+                username: nameVar, // username คือค่า attribute ใน db
+                password: passwordVar // password คือค่า attribute ใน db
             };
             dbo.collection("userLoginTable").findOne({
                 username: nameVar
@@ -72,7 +72,6 @@ router.post("/register", (req, res) => {
                     });
                 }
                 console.log(result);
-
                 if (result) {
                     res.send({
                         status: false,
@@ -93,7 +92,8 @@ router.post("/register", (req, res) => {
                 }
             });
             db.close();
-        });
+        }
+    );
 });
 
 router.post("/login", (req, res) => {
@@ -128,7 +128,7 @@ router.post("/login", (req, res) => {
                         unit_name: user.unit_name,
                         username: user.username
                     }, 'secret', {
-                        expiresIn: "365d", // 1 Year                         
+                        expiresIn: "365d", // 1 Year
                         subject: "JWT"
                     });
                     res.send(
@@ -169,6 +169,5 @@ router.post('/verifyToken', (req, res) => {
         }
     );
 });
-
 
 module.exports = router;

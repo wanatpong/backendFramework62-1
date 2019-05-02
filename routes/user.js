@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const MongoClient = require("mongodb").MongoClient;
 
-
 router.get("/", (req, res) => {
     res.send({
         status: "user"
@@ -12,7 +11,8 @@ router.get("/", (req, res) => {
 router.get('/list/:pageNumber', (req, res) => {
     const pageNumber = req.params.pageNumber;
     let itemPerPage = 10;
-    MongoClient.connect("mongodb+srv://weerayut:22374736@cluster0-4wunc.gcp.mongodb.net/newDatabase62?retryWrites=true", {
+    MongoClient.connect(
+        "mongodb+srv://weerayut:22374736@cluster0-4wunc.gcp.mongodb.net/newDatabase62?retryWrites=true", {
             useNewUrlParser: true
         },
         function (err, db) {
@@ -34,6 +34,7 @@ router.get('/list/:pageNumber', (req, res) => {
                         id_mil: 1,
                         unit_name: 1,
                         username: 1
+
                     }
                 })
                 .sort({
@@ -47,14 +48,13 @@ router.get('/list/:pageNumber', (req, res) => {
                     }
                     db.close();
                 });
-
         }
-
     );
 });
 
 router.get('/list-count', (req, res) => {
-    MongoClient.connect("mongodb+srv://weerayut:22374736@cluster0-4wunc.gcp.mongodb.net/newDatabase62?retryWrites=true", {
+    MongoClient.connect(
+        "mongodb+srv://weerayut:22374736@cluster0-4wunc.gcp.mongodb.net/newDatabase62?retryWrites=true", {
             useNewUrlParser: true
         },
         function (err, db) {
@@ -81,9 +81,7 @@ router.get('/list-count', (req, res) => {
                     db.close();
                 });
         }
-
     );
 });
-
 
 module.exports = router;
